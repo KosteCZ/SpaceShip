@@ -1,10 +1,13 @@
 package cz.koscak.jan.game.spaceship.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Game {
 
     private static final int GAME_SPEED_DELAY_DEFAULT = 80;
-    /*private List<SpaceShip> listOfSpaceShip = new ArrayList<>();
-    private List<Planet> listOfPlanets = new ArrayList<>();*/
+    private List<SpaceShip> listOfSpaceShips = new ArrayList<>();
+    /*private List<Planet> listOfPlanets = new ArrayList<>();*/
 
     private boolean debugMode = false;
 
@@ -25,7 +28,8 @@ public class Game {
             gameStatus = GameStatus.PAUSED;
         }
 
-       //SpaceShip new;
+        SpaceShip spaceShip = new SpaceShip(400, 400);
+        listOfSpaceShips.add(spaceShip);
 
         checkVictoryCondition();
     }
@@ -36,6 +40,9 @@ public class Game {
         }
         time = time + 1;
 
+        for (SpaceShip spaceShip: listOfSpaceShips) {
+            spaceShip.move();
+        }
         /*for (Human human: listOfHumans) {
             human.doAction(this, time, listOfViruses);
         }*/
@@ -87,6 +94,10 @@ public class Game {
 
     public void setSpeed(int speed) {
         this.speed = speed;
+    }
+
+    public List<SpaceShip> getListOfSpaceShips() {
+        return listOfSpaceShips;
     }
 
 }

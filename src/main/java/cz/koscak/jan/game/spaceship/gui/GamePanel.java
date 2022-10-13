@@ -5,6 +5,9 @@ import cz.koscak.jan.game.spaceship.model.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 public class GamePanel extends JPanel {
@@ -84,6 +87,7 @@ public class GamePanel extends JPanel {
     private void addNewGameButton() {
         buttonNewGame = new JButton("New game");
         buttonNewGame.setBounds(BUTTON_NEW_GAME_POSITION_X, 1, 100, 28);
+        buttonNewGame.setFocusable(false);
 
         buttonNewGame.addActionListener(event -> {
             buttonPause.setEnabled(true);
@@ -95,6 +99,7 @@ public class GamePanel extends JPanel {
     private void addPauseButton() {
         buttonPause = new JButton("Resume");
         buttonPause.setBounds(BUTTON_PAUSE_POSITION_X, 1, 90, 28);
+        buttonNewGame.setFocusable(false);
 
 		buttonPause.addActionListener(event -> {
             GameStatus gameStatus = game.getGameStatus();
@@ -217,10 +222,51 @@ public class GamePanel extends JPanel {
         if (game.isDebugMode()) {
             g.drawImage(images.spaceShip1, 370, 225, this);
         }
-		/*for (Human human: game.getListOfHumans()) {
-			human.paint(g);
-		}*/
+        if (game.isDebugMode()) {
+            g.setColor(Color.BLACK);
+            g.drawLine(300, 300, 300, 350);
+            g.drawLine(300, 300, 350, 350);
+            /*System.out.println("Sin 0:" + Math.sin(0));
+            System.out.println("Sin 90:" + Math.sin(90));
+            System.out.println("Sin 180:" + Math.sin(180));
+            System.out.println("Sin PI:" + Math.sin(Math.PI));
+            System.out.println("Sin PI/6:" + Math.sin(Math.PI/6));
+            System.out.println("Sin PI/2:" + Math.sin(Math.PI/2));*/
+
+            for (int i = 0; i <= 120; i++) {
+                g.drawLine(200,
+                        300,
+                        200 + (int) Math.floor(Math.cos(Math.toRadians(i)) * 50 + 0.5d),
+                        300 + (int) Math.floor(Math.sin(Math.toRadians(i)) * 50 + 0.5d));
+            }
+        }
+        for (SpaceShip spaceShip: game.getListOfSpaceShips()) {
+            //g.drawImage(images.spaceShip1, spaceShip.getIntX(), spaceShip.getIntY(), this);
+
+            BufferedImage bufferedImage = new BufferedImage(images.spaceShip1.getWidth(this), images.spaceShip1.getHeight(this), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D bufferedImageGraphics = bufferedImage.createGraphics();
+            bufferedImageGraphics.drawImage(images.spaceShip1, 0, 0, null);
+            bufferedImageGraphics.dispose();
+            //g.drawImage(bufferedImage, spaceShip.getIntX() + 50, spaceShip.getIntY(), this);
+            g.drawImage(rotate(bufferedImage, spaceShip.getRotation()), spaceShip.getIntX(), spaceShip.getIntY(), this);
+        }
 	}
+
+    public static BufferedImage rotate(BufferedImage bufferedImage, Double angle) {
+        double sin = Math.abs(Math.sin(Math.toRadians(angle)));
+        double cos = Math.abs(Math.cos(Math.toRadians(angle)));
+        int width = bufferedImage.getWidth();
+        int height = bufferedImage.getHeight();
+        int newWidth = (int) Math.floor((width * cos) + (height * sin));
+        int newHeight = (int) Math.floor((height * cos) + (width * sin));
+        BufferedImage rotated = new BufferedImage(newWidth, newHeight, bufferedImage.getType());
+        Graphics2D graphic = rotated.createGraphics();
+        graphic.translate((newWidth-width) / 2, (newHeight-height) / 2);
+        graphic.rotate(Math.toRadians(angle), width / 2, height / 2);
+        graphic.drawRenderedImage(bufferedImage, null);
+        graphic.dispose();
+        return rotated;
+    }
 
 	/*private void paintArena(Graphics g) {
 		//g.drawRect(40, 10, WIDTH, HEIGHT);
