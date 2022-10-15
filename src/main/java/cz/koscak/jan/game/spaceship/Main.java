@@ -6,7 +6,7 @@ import cz.koscak.jan.game.spaceship.model.Game;
 import javax.swing.*;
 
 public class Main {
-    private static final boolean DEBUG_MODE = true; //false;
+    private static final boolean DEBUG_MODE =  false; //true; //false;
     public static void main(String[] args) {
         resetScreenScalingOnWindowsOS();
 

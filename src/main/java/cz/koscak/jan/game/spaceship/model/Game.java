@@ -1,13 +1,18 @@
 package cz.koscak.jan.game.spaceship.model;
 
+import cz.koscak.jan.game.spaceship.gui.GameFrame;
+import cz.koscak.jan.game.spaceship.gui.GamePanel;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 public class Game {
 
     private static final int GAME_SPEED_DELAY_DEFAULT = 80;
     private List<SpaceShip> listOfSpaceShips = new ArrayList<>();
-    /*private List<Planet> listOfPlanets = new ArrayList<>();*/
+    private List<Bullet> listOfBullets = new ArrayList<>();
+    private List<Planet> listOfPlanets = new ArrayList<>();
 
     private boolean debugMode = false;
 
@@ -28,8 +33,17 @@ public class Game {
             gameStatus = GameStatus.PAUSED;
         }
 
+        listOfSpaceShips = new ArrayList<>();
+        listOfBullets = new ArrayList<>();
+        listOfPlanets = new ArrayList<>();
+
         SpaceShip spaceShip = new SpaceShip(400, 400);
         listOfSpaceShips.add(spaceShip);
+
+        listOfPlanets.add(new Planet(200 - 15, GamePanel.TOP_BAR + 200 - 15, 30));
+        listOfPlanets.add(new Planet(600 - 15, GamePanel.TOP_BAR + 200 - 15, 30));
+        listOfPlanets.add(new Planet(200 - 15, GamePanel.TOP_BAR + 600 - 15, 30));
+        listOfPlanets.add(new Planet(600 - 15, GamePanel.TOP_BAR + 600 - 15, 30));
 
         checkVictoryCondition();
     }
@@ -41,12 +55,25 @@ public class Game {
         time = time + 1;
 
         for (SpaceShip spaceShip: listOfSpaceShips) {
+            spaceShip.decreaseReloadingTime();
             spaceShip.move();
         }
+        moveBulletsAndRemoveOld();
         /*for (Human human: listOfHumans) {
             human.doAction(this, time, listOfViruses);
         }*/
     }
+
+    private void moveBulletsAndRemoveOld() {
+        ListIterator<Bullet> iteratorBullet = listOfBullets.listIterator();
+        while(iteratorBullet.hasNext()){
+            if(!iteratorBullet.next().move()){
+                iteratorBullet.remove();
+                if (isDebugMode()) System.out.println("Bullet removed...");
+            }
+        }
+    }
+
 
     private void checkVictoryCondition() {
         /*if (dead >= 10) {
@@ -100,4 +127,11 @@ public class Game {
         return listOfSpaceShips;
     }
 
+    public List<Bullet> getListOfBullets() {
+        return listOfBullets;
+    }
+
+    public List<Planet> getListOfPlanets() {
+        return listOfPlanets;
+    }
 }

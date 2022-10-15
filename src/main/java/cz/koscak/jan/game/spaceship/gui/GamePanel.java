@@ -9,6 +9,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
+import java.util.ConcurrentModificationException;
+import java.util.ListIterator;
 
 public class GamePanel extends JPanel {
 
@@ -28,16 +30,17 @@ public class GamePanel extends JPanel {
     private JButton buttonNewGame;
     private JButton buttonPause;
 
-    //	private static final int HEIGHT = 800;
-    //	private static final int WIDTH = 800;
+    public static final int WIDTH = 800;
+    public static final int TOP_BAR = 28;
+    public static final int HEIGHT = 828;
 
 	GamePanel(Game game) {
 		this.game = game;
-		//setPreferredSize(new Dimension(WIDTH, HEIGHT));
+		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		//setBackground(Color.BLACK);
 
 		//setPreferredSize(new Dimension(825, 825));
-		setPreferredSize(new Dimension(800, 828));
+		//setPreferredSize(new Dimension(800, 828));
 		//setSize(790, 790);
 
 		setDoubleBuffered(true);
@@ -52,14 +55,14 @@ public class GamePanel extends JPanel {
 
         /*JLabel label = new JLabel("Username");
         label.setToolTipText("Enter your username");
-        label.setBounds(700, 1, 90, 28);
+        label.setBounds(700, 1, 90, TOP_BAR);
         add(label);*/
 
         images = new Images();
 	}
 
     private void addSpeedOfGameScrollBar() {
-        scrollBarSpeedOfGame.setBounds(SCROLL_BAR_SPEED_OF_GAME_POSITION_X, 1, 90, 28);
+        scrollBarSpeedOfGame.setBounds(SCROLL_BAR_SPEED_OF_GAME_POSITION_X, 1, 90, TOP_BAR);
         scrollBarSpeedOfGame.setOrientation(JScrollBar.HORIZONTAL);
         scrollBarSpeedOfGame.setMinimum(1);
         scrollBarSpeedOfGame.setMaximum(7);
@@ -67,6 +70,7 @@ public class GamePanel extends JPanel {
         scrollBarSpeedOfGame.setValue(game.getSpeed());
         scrollBarSpeedOfGame.setUnitIncrement(1);
         scrollBarSpeedOfGame.setBlockIncrement(1);
+        scrollBarSpeedOfGame.setFocusable(false);
         scrollBarSpeedOfGame.setEnabled(true);
 
         AdjustmentListener listener = event -> {
@@ -86,7 +90,7 @@ public class GamePanel extends JPanel {
 
     private void addNewGameButton() {
         buttonNewGame = new JButton("New game");
-        buttonNewGame.setBounds(BUTTON_NEW_GAME_POSITION_X, 1, 100, 28);
+        buttonNewGame.setBounds(BUTTON_NEW_GAME_POSITION_X, 1, 100, TOP_BAR);
         buttonNewGame.setFocusable(false);
 
         buttonNewGame.addActionListener(event -> {
@@ -98,24 +102,28 @@ public class GamePanel extends JPanel {
     }
     private void addPauseButton() {
         buttonPause = new JButton("Resume");
-        buttonPause.setBounds(BUTTON_PAUSE_POSITION_X, 1, 90, 28);
+        buttonPause.setBounds(BUTTON_PAUSE_POSITION_X, 1, 90, TOP_BAR);
         buttonNewGame.setFocusable(false);
 
 		buttonPause.addActionListener(event -> {
-            GameStatus gameStatus = game.getGameStatus();
-            if (GameStatus.PLAY.equals(gameStatus)) {
-                game.setGameStatus(GameStatus.PAUSED);
-                buttonPause.setText("Resume");
-            } else if (GameStatus.PAUSED.equals(gameStatus)) {
-                game.setGameStatus(GameStatus.PLAY);
-                buttonPause.setText("Pause");
-            }
+            togglePauseAndResume();
         });
 
 		add(buttonPause);
 	}
 
-	public void paintComponent(Graphics g) {
+    public void togglePauseAndResume() {
+        GameStatus gameStatus = game.getGameStatus();
+        if (GameStatus.PLAY.equals(gameStatus)) {
+            game.setGameStatus(GameStatus.PAUSED);
+            buttonPause.setText("Resume");
+        } else if (GameStatus.PAUSED.equals(gameStatus)) {
+            game.setGameStatus(GameStatus.PLAY);
+            buttonPause.setText("Pause");
+        }
+    }
+
+    public void paintComponent(Graphics g) {
 
 		super.paintComponent(g);
 
@@ -131,7 +139,7 @@ public class GamePanel extends JPanel {
 
 		if (game.isDebugMode()) {
             g.drawString("Scrollbar: " + scrollBarSpeedOfGame.getValue(),
-                    STRING_SCROLL_BAR_SPEED_OF_GAME_POSITION_X, 28 + 15);
+                    STRING_SCROLL_BAR_SPEED_OF_GAME_POSITION_X, TOP_BAR + 15);
         }
 
         checkStateOfGame(g2);
@@ -153,17 +161,17 @@ public class GamePanel extends JPanel {
     private void paintEndOfGame(Graphics2D g) {
 	    if (game.getGameStatus().equals(GameStatus.VICTORY) || game.getGameStatus().equals(GameStatus.DEFEAT)) {
             g.setColor(Color.LIGHT_GRAY);
-            g.fillRect(320, 28 + 370, 160, 60);
+            g.fillRect(320, TOP_BAR + 370, 160, 60);
             g.setColor(Color.BLACK);
-            g.drawRect(320, 28 + 370, 160, 60);
+            g.drawRect(320, TOP_BAR + 370, 160, 60);
             g.setColor(Color.BLACK);
             Font originalFont = g.getFont();
             Font newFont = originalFont.deriveFont(originalFont.getSize() * 2.0F);
             g.setFont(newFont);
             if (game.getGameStatus().equals(GameStatus.VICTORY)) {
-                g.drawString("VICTORY!!!", 338, 28 + 409);
+                g.drawString("VICTORY!!!", 338, TOP_BAR + 409);
             } else if (game.getGameStatus().equals(GameStatus.DEFEAT)) {
-                g.drawString("DEFEAT!!!", 342, 28 + 409);
+                g.drawString("DEFEAT!!!", 342, TOP_BAR + 409);
             }
             g.setFont(originalFont);
         }
@@ -206,18 +214,18 @@ public class GamePanel extends JPanel {
 		g.drawString("Speed: " + game.getSpeedForUI(), STRING_SPEED_POSITION_X, 21);
         g.drawString("Time: " + game.getTime(), STRING_TIME_POSITION_X, 21);
 		g.setColor(Color.BLACK);
-		g.drawRect(-1, 28, 801, 801);
+		g.drawRect(-1, TOP_BAR, 801, 801);
 
 
         if (game.isDebugMode()) {
             g.setColor(Color.BLUE);
-            g.drawRect(0, 28 + 0, 399, 399);
+            g.drawRect(0, TOP_BAR + 0, 399, 399);
             g.setColor(Color.MAGENTA);
-            g.drawRect(0, 28 + 400, 399, 399);
+            g.drawRect(0, TOP_BAR + 400, 399, 399);
             g.setColor(Color.GREEN);
-            g.drawRect(400, 28 + 0, 399, 399);
+            g.drawRect(400, TOP_BAR + 0, 399, 399);
             g.setColor(Color.YELLOW);
-            g.drawRect(400, 28 + 400, 399, 399);
+            g.drawRect(400, TOP_BAR + 400, 399, 399);
         }
         if (game.isDebugMode()) {
             g.drawImage(images.spaceShip1, 370, 225, this);
@@ -248,7 +256,29 @@ public class GamePanel extends JPanel {
             bufferedImageGraphics.drawImage(images.spaceShip1, 0, 0, null);
             bufferedImageGraphics.dispose();
             //g.drawImage(bufferedImage, spaceShip.getIntX() + 50, spaceShip.getIntY(), this);
-            g.drawImage(rotate(bufferedImage, spaceShip.getRotation()), spaceShip.getIntX(), spaceShip.getIntY(), this);
+            BufferedImage rotatedImage = rotate(bufferedImage, spaceShip.getRotation());
+            g.drawImage(
+                    rotatedImage,
+                    spaceShip.getIntX() - (int) Math.floor(spaceShip.paintCorrectionBasedOnRotation() * images.spaceShip1.getWidth(this) + 0.5d),
+                    spaceShip.getIntY() - (int) Math.floor(spaceShip.paintCorrectionBasedOnRotation() * images.spaceShip1.getWidth(this) + 0.5d),
+                    this);
+        }
+
+        //g.setColor(Color.CYAN);
+        g.setColor(Color.BLUE);
+        for (Planet planet: game.getListOfPlanets()) {
+            g.fillOval(planet.getX(), planet.getY(), planet.getDiameter(), planet.getDiameter());
+        }
+
+        g.setColor(Color.RED);
+        ListIterator<Bullet> iteratorBullet = game.getListOfBullets().listIterator();
+        try {
+            while(iteratorBullet.hasNext()) {
+                Bullet bullet = iteratorBullet.next();
+                g.drawRect(bullet.getIntX() - 2, bullet.getIntY() - 2, 3, 3);
+            }
+        } catch (ConcurrentModificationException exception) {
+            // Ignore
         }
 	}
 
@@ -268,7 +298,11 @@ public class GamePanel extends JPanel {
         return rotated;
     }
 
-	/*private void paintArena(Graphics g) {
+    Images getImages() {
+        return images;
+    }
+
+    /*private void paintArena(Graphics g) {
 		//g.drawRect(40, 10, WIDTH, HEIGHT);
 	}*/
 

@@ -3,12 +3,14 @@ package cz.koscak.jan.game.spaceship.model;
 public class SpaceShip {
 
     private static final double FORCE_MAX = 1;
-    private static final double FORCE_MIN = -0.1;
+    private static final double FORCE_MIN = -0.2;
     private static final double ROTATION_MAX = 1;
     private static final double ROTATION_MIN = -1;
+    private static final int TIME_TO_RELOAD_BULLET = 5;
     private double x, y;
     private double force, rotation;
     private double rotationChange;
+    private int timeToReloadBullet;
 
     public SpaceShip(double x, double y) {
         this.x = x;
@@ -16,6 +18,7 @@ public class SpaceShip {
         force = 1;
         rotation = 0;
         rotationChange = 1;
+        timeToReloadBullet = 0;
     }
 
     public int getIntX() {
@@ -40,7 +43,26 @@ public class SpaceShip {
         //System.out.println("VY: " + (force * Math.sin(Math.toRadians(rotation))));
         x = x + (force * Math.cos(Math.toRadians(rotation)));
         y = y + (force * Math.sin(Math.toRadians(rotation)));
-        System.out.println("FORCE: " + force + ", ROTATION: " + rotation + ", RC: " + rotationChange);
+
+        // Position:
+        /*System.out.println("FORCE: " + force + ", ROTATION: " + rotation + ", RC: " + rotationChange);
+        System.out.println("SIN: " + Math.sin(Math.toRadians(rotation)) + "COS: " + Math.cos(Math.toRadians(rotation)));
+        System.out.println();
+        System.out.println("SIN + COS - 1: " + paintCorrectionBasedOnRotation());
+        System.out.println();
+        System.out.println();*/
+    }
+
+    public void decreaseReloadingTime() {
+        if (timeToReloadBullet > 0 ) timeToReloadBullet = timeToReloadBullet - 1;
+    }
+
+    public void setReloadingTimeForBullet() {
+        timeToReloadBullet = TIME_TO_RELOAD_BULLET;
+    }
+
+    public double paintCorrectionBasedOnRotation() {
+        return (Math.abs( (Math.abs(Math.sin(Math.toRadians(rotation)))) + Math.abs(Math.cos(Math.toRadians(rotation))) - 1)  / 2);
     }
 
     public void increaseForce() {
@@ -71,4 +93,7 @@ public class SpaceShip {
         }
     }
 
+    public int getTimeToReloadBullet() {
+        return timeToReloadBullet;
+    }
 }
